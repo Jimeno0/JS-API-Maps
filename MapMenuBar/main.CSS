@@ -1,0 +1,51 @@
+html, body, #mapDiv {
+
+    	padding: 0;
+    	margin: 0px;
+    	height: 100%;
+      width: 100%;
+ }
+
+#btnMad {
+	position:absolute;
+	right:215px;
+	top:10px;
+	z-Index:999;
+}
+	
+
+
+#btnBcn {
+	position:absolute;
+	right:120px;
+	top:10px;
+	z-Index:999;
+}
+
+#btnEsp {
+position:absolute;
+	right:40px;
+	top:10px;
+	z-Index:999;
+}
+
+#btnCoor {
+  position:absolute;
+  right:40px;
+  top:60px;
+  z-Index:999;
+}
+
+
+
+  
+.btn-primary{
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+
+}
+
+ul .btn-default{
+  border-color: transparent;
+}
