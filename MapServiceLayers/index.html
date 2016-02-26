@@ -20,16 +20,20 @@
     require([
       "esri/map",
       "esri/layers/ArcGISTiledMapServiceLayer",
+      "esri/layers/ArcGISImageServiceLayer",
       "dojo/domReady!"], 
-      function(Map, ArcGISTiledMapServiceLayer) {
+      function(Map, ArcGISTiledMapServiceLayer,ArcGISImageServiceLayer) {
       var map = new Map("mapDiv", {
         center: [-56.049, 38.485],
         zoom: 3,
         basemap: "streets"
         });
-      var tiled= new ArcGISTiledMapServiceLayer(  
+      var tiled = new ArcGISTiledMapServiceLayer(  
       "http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer");
+      var image = new ArcGISImageServiceLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer" );
+
       map.addLayer(tiled);
+      map.addLayer(image);
        });
     </script>
 
