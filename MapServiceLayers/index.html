@@ -17,24 +17,52 @@
     </style>
 
     <script>
-    require([
-      "esri/map",
-      "esri/layers/ArcGISTiledMapServiceLayer",
-      "esri/layers/ArcGISImageServiceLayer",
-      "dojo/domReady!"], 
-      function(Map, ArcGISTiledMapServiceLayer,ArcGISImageServiceLayer) {
-      var map = new Map("mapDiv", {
-        center: [-56.049, 38.485],
-        zoom: 3,
-        basemap: "streets"
-        });
-      var tiled = new ArcGISTiledMapServiceLayer(  
-      "http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer");
-      var image = new ArcGISImageServiceLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer" );
 
-      map.addLayer(tiled);
-      map.addLayer(image);
-       });
+
+      //Direcciones de los servicios (buenas practicas, definir las variables que seran constantes fuera del require)
+      //Podemos cargar un MapServer con feature layer si lo hacemos capa por capa
+      var urlTiled = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer'
+      var urlImage = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer'
+      var urlDynamic = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer'
+      var urlFeature = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Military/FeatureServer/2'
+        
+      var map;
+     
+
+      require([
+        "esri/map",
+        "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/layers/ArcGISImageServiceLayer",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/layers/FeatureLayer",
+        "dojo/domReady!"], 
+        function(Map, ArcGISTiledMapServiceLayer,ArcGISImageServiceLayer,ArcGISDynamicMapServiceLayer,FeatureLayer) {
+          map = new Map("mapDiv", {
+          center: [-56.049, 38.485],
+          zoom: 3,
+          //basemap: "streets"
+        });
+
+
+
+        //Creamos las capas
+        var tiled = new ArcGISTiledMapServiceLayer(urlTiled);
+        var image = new ArcGISImageServiceLayer(urlImage);
+        var dymanic = new ArcGISDynamicMapServiceLayer(urlDynamic);
+        var feature = new FeatureLayer(urlFeature,{
+          id:'countiesFeature',
+          opacity:0.5,
+        });
+        //Añadimos las capas al mapa
+        map.addLayer(tiled);
+        map.addLayer(image);
+        map.addLayer(dymanic);
+        map.addLayer(feature);
+
+      });
+
+
+
     </script>
 
   </head>

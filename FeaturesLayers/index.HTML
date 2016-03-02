@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Map</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+    <script src="https://js.arcgis.com/3.15/"></script>
+    
+    <style>
+      html, body, #mapDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+    </style>
+
+    <script>
+
+      var countiesUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/3'
+      var highwaysUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/1' 
+      var citiesUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0' 
+      var map;
+   
+      require([
+        "esri/map",
+        "esri/layers/FeatureLayer",
+        "dojo/domReady!"], 
+        function(Map,FeatureLayer) {
+          map = new Map("mapDiv", {
+          center: [-56.049, 38.485],
+          zoom: 3,
+          basemap: "streets"
+        });
+
+        //Creamos las capas con sus ids
+        var counties = new FeatureLayer(countiesUrl,{
+          id:'countiesId',
+          opacity:1,
+        });
+        var highways = new FeatureLayer(highwaysUrl,{
+          id:'highwaysId',
+        });
+        var cities = new FeatureLayer(citiesUrl,{
+          id:'citiesId',
+        });
+
+        //Añadimos las capas al mapa
+        
+        map.addLayer(highways,1);
+        map.addLayer(counties,0);
+        map.addLayer(cities,2);
+      
+        //Para obtener los IDs: map.graphicsLayerIds
+        
+        //Para colocar la capa cities debajo del todo: map.reorderLayer('cities',0)
+
+      });
+    </script>
+  </head>
+  <body class="claro">
+    <div id="mapDiv"></div>
+  </body>
+</html>

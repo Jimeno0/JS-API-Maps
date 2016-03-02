@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+      
+      <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      <script src="https://js.arcgis.com/3.15/"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+      <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <title>Map</title>
+    
+    <style>
+      html, body, #map {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+
+      #basemapGallery {
+        position:absolute;
+        right:215px;
+        top:10px;
+        z-Index:999;
+      }
+      .dropdown {
+          position:absolute;
+          right:320px;
+          top:10px;
+          z-Index:999;
+          background-color: white;
+        }
+          
+
+
+    </style>
+
+    <script>
+
+ 
+    var map;
+    var basemapGallery;
+    require([
+      "esri/map", "esri/dijit/BasemapGallery", "esri/arcgis/utils",
+      "dojo/parser",
+
+      "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/TitlePane",
+      "dojo/domReady!"
+    ], function(
+      Map, BasemapGallery, arcgisUtils,
+      parser
+    ) {
+      parser.parse();
+
+      map = new Map("map", {
+        basemap: "topo",
+        center: [-105.255, 40.022],
+        zoom: 13
+      });
+
+      //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
+      basemapGallery = new BasemapGallery({
+        showArcGISBasemaps: true,
+        map: map
+      }, "basemapGallery");
+      basemapGallery.startup();
+      
+      basemapGallery.on("error", function(msg) {
+        console.log("basemap gallery error:  ", msg);
+      });
+    });
+    </script>
+  </head>
+  <body class="claro">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Mapas Base
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+        <li id="basemapGallery" class="dropdown-menu" >Basemaps</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div id="map"></div>
+  </body>
+</html>
