@@ -37,62 +37,62 @@
     </style>
 
     <script>
-    require([
-      "esri/map",
-      "esri/tasks/query",
-      "esri/tasks/QueryTask",
-      "esri/symbols/PictureMarkerSymbol",
-      "esri/layers/GraphicsLayer",
-      "esri/graphic",
-      "dojo/domReady!"], 
-      function(Map,Query,QueryTask,PictureMarkerSymbol,GraphicsLayer,Graphic) {
-      map = new Map("mapDiv", {
-        center: [-56.049, 38.485],
-        zoom: 3,
-        basemap: "streets"
-        })
+        require([
+          "esri/map",
+          "esri/tasks/query",
+          "esri/tasks/QueryTask",
+          "esri/symbols/PictureMarkerSymbol",
+          "esri/layers/GraphicsLayer",
+          "esri/graphic",
+          "dojo/domReady!"], 
+          function(Map,Query,QueryTask,PictureMarkerSymbol,GraphicsLayer,Graphic) {
+          map = new Map("mapDiv", {
+            center: [-56.049, 38.485],
+            zoom: 3,
+            basemap: "dark-gray"
+            })
 
-      //Creamos una graphicLayer
-      var graphicPop = new GraphicsLayer();
-      //La añadimos al mapa
-      map.addLayer(graphicPop);
-      //Definimos el boton segun id
-      var btnPopu = document.getElementById('btnQuery');
-      //Añadimos evento click sobre el boton
-      btnPopu.addEventListener('click',function(){
-        //Limpiamos la capa grafica para que no se solapen selecciones sucesivas
-        graphicPop.clear();
-        
-        //Obtenemos el valor de poblacion la caja de texo para hacer la cosulta
-        var Poblacion = parseFloat(inputPop.value);
-
-        //Definimos la query y sus propiedades
-        var query = new Query();
-        query.where = "pop2000>" + Poblacion;
-        query.returnGeometry = true;
-        query.outFields = ["class","st","capital"];
+          //Creamos una graphicLayer
+          var graphicPop = new GraphicsLayer();
+          //La añadimos al mapa
+          map.addLayer(graphicPop);
+          //Definimos el boton segun id
+          var btnPopu = document.getElementById('btnQuery');
+          //Añadimos evento click sobre el boton
+          btnPopu.addEventListener('click',function(){
+                //Limpiamos la capa grafica para que no se solapen selecciones sucesivas
+                graphicPop.clear();
                 
+                //Obtenemos el valor de poblacion la caja de texo para hacer la cosulta
+                var Poblacion = parseFloat(inputPop.value);
 
-        //Definimos la QueryTask 
-        var queryTask = new QueryTask('http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0');
-        //Y la ejecutamos, como callback hacemos la funcion addCities definida debajo
-        queryTask.execute(query,addCities);
-        //Funcion:
-        function addCities(fsResult){
-              //Obtenemos las features de la Feature Set que nos devuelve el execute y las almacenamos en var features
-              var features = fsResult.features;
-              //Definimos la simbologia que despues aplicaremos a nuestras features
-              var pictureMarkerSymbol = new PictureMarkerSymbol('http://www.pixel-pro.com/orange/img/illustrations/location.png', 35, 35);
-              //Bucle for que recorrera todas las entidades de nuestra features, aplicandoles una simbologia y añadiendolas a la capa grafica.
-              for (var i = 0; i < features.length; i++) {
+                //Definimos la query y sus propiedades
+                var query = new Query();
+                query.where = "pop2000>" + Poblacion;
+                query.returnGeometry = true;
+                query.outFields = ["class","st","capital"];
+                        
 
-                features[i].symbol = pictureMarkerSymbol;
+                //Definimos la QueryTask 
+                var queryTask = new QueryTask('http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0');
+                //Y la ejecutamos, como callback hacemos la funcion addCities definida debajo
+                queryTask.execute(query,addCities);
+                //Funcion:
+                function addCities(fsResult){
+                      //Obtenemos las features de la Feature Set que nos devuelve el execute y las almacenamos en var features
+                      var features = fsResult.features;
+                      //Definimos la simbologia que despues aplicaremos a nuestras features
+                      var pictureMarkerSymbol = new PictureMarkerSymbol('http://www.pixel-pro.com/orange/img/illustrations/location.png', 35, 35);
+                      //Bucle for que recorrera todas las entidades de nuestra features, aplicandoles una simbologia y añadiendolas a la capa grafica.
+                      for (var i = 0; i < features.length; i++) {
 
-                graphicPop.add(features[i]);
-              }
-        }
+                        features[i].symbol = pictureMarkerSymbol;
+
+                        graphicPop.add(features[i]);
+                      };
+            };
+          });
         });
-      });
     </script>
 
   </head>
