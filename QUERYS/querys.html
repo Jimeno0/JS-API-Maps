@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://js.arcgis.com/3.15/"></script>
+
+    
+    <title>Population Querys</title>
+
+    <style>
+    html, body, #mapDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+  }
+    #btnQuery {
+      position:absolute;
+      right:40px;
+      top:60px;
+      z-Index:999;
+    }
+
+     #inputPop {
+      position:absolute;
+      right:120px;
+      top:60px;
+      z-Index:999;
+      width:20%;
+    }
+
+    </style>
+
+    <script>
+    require([
+      "esri/map",
+      "esri/tasks/query",
+      "esri/tasks/QueryTask",
+      "esri/symbols/PictureMarkerSymbol",
+      "esri/layers/GraphicsLayer",
+      "esri/graphic",
+      "dojo/domReady!"], 
+      function(Map,Query,QueryTask,PictureMarkerSymbol,GraphicsLayer,Graphic) {
+      map = new Map("mapDiv", {
+        center: [-56.049, 38.485],
+        zoom: 3,
+        basemap: "streets"
+        })
+
+      //Creamos una graphicLayer
+      var graphicPop = new GraphicsLayer();
+      //La añadimos al mapa
+      map.addLayer(graphicPop);
+      //Definimos el boton segun id
+      var btnPopu = document.getElementById('btnQuery');
+      //Añadimos evento click sobre el boton
+      btnPopu.addEventListener('click',function(){
+        //Limpiamos la capa grafica para que no se solapen selecciones sucesivas
+        graphicPop.clear();
+        
+        //Obtenemos el valor de poblacion la caja de texo para hacer la cosulta
+        var Poblacion = parseFloat(inputPop.value);
+
+        //Definimos la query y sus propiedades
+        var query = new Query();
+        query.where = "pop2000>" + Poblacion;
+        query.returnGeometry = true;
+        query.outFields = ["class","st","capital"];
+                
+
+        //Definimos la QueryTask 
+        var queryTask = new QueryTask('http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0');
+        //Y la ejecutamos, como callback hacemos la funcion addCities definida debajo
+        queryTask.execute(query,addCities);
+        //Funcion:
+        function addCities(fsResult){
+              //Obtenemos las features de la Feature Set que nos devuelve el execute y las almacenamos en var features
+              var features = fsResult.features;
+              //Definimos la simbologia que despues aplicaremos a nuestras features
+              var pictureMarkerSymbol = new PictureMarkerSymbol('http://www.pixel-pro.com/orange/img/illustrations/location.png', 35, 35);
+              //Bucle for que recorrera todas las entidades de nuestra features, aplicandoles una simbologia y añadiendolas a la capa grafica.
+              for (var i = 0; i < features.length; i++) {
+
+                features[i].symbol = pictureMarkerSymbol;
+
+                graphicPop.add(features[i]);
+              }
+        }
+        });
+      });
+    </script>
+
+  </head>
+
+  <body class="claro">
+  <div>
+      <button id='btnQuery' type="button" class="btn btn-default">Buscar</button>
+  </div>
+  <div>
+    <input id='inputPop' type="text" class="form-control" placeholder="Población"></div>
+  <div id="mapDiv"></div>
+  </body>
+
+</html>
