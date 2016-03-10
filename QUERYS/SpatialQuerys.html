@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://js.arcgis.com/3.16/"></script>
+
+    
+    <title>Population Querys</title>
+
+    <style>
+    html, body, #mapDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+  }
+
+    #inputs {
+      position:absolute;
+      right:60px;
+      top:30px;
+      z-Index:999;
+      width:20%;
+    }
+
+    div label{color: gray}
+
+    </style>
+
+    <script>
+
+
+        require([
+          "esri/map",
+          "esri/tasks/query",
+          "esri/tasks/QueryTask",
+          "esri/symbols/PictureMarkerSymbol",
+          "esri/geometry/Circle",
+          "esri/symbols/SimpleFillSymbol",
+           "esri/symbols/SimpleLineSymbol",
+           "esri/Color",
+          "esri/layers/GraphicsLayer",
+          "esri/graphic",
+          "dojo/domReady!"], 
+          function(Map,Query,QueryTask,PictureMarkerSymbol,Circle,SimpleFillSymbol,SimpleLineSymbol,Color,GraphicsLayer,Graphic) {
+          map = new Map("mapDiv", {
+            center: [-56.049, 38.485],
+            zoom: 3,
+            basemap: "dark-gray"
+            })
+
+          var punto,Radius,circulo;
+
+          //Creamos las graphicLayers (punto para el centro del circulo,Circulo para el circulo y Pop donde se mostraran las ciudades que nos devuelva la query)
+          var graphicPop = new GraphicsLayer();
+          var graphicPunto = new GraphicsLayer();
+          var graphicCirculo = new GraphicsLayer();
+          //Añadimos al mapa las capas
+          map.addLayer(graphicCirculo);
+          map.addLayer(graphicPunto);
+          map.addLayer(graphicPop);
+          //Simbologia para los puntos
+          var puntoSymbol = new PictureMarkerSymbol("http://esri.github.io/quickstart-map-js/images/blue-pin.png",20,35);
+          //Simbologia para el circulo
+          var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                  new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                  new Color([255,0,0]), 0.2),new Color([255,0,0,0.15])
+          );
+          //Evento click en el mapa:
+          map.on("click",function(e){
+              //Limipamos las grapiclayers de circulo y punto
+              graphicCirculo.clear();
+              graphicPunto.clear();
+              //Creamos el centro de la circunferencia que define nuestra seleccion con 
+              //map.Point, que sera donde hemos echo click
+              punto = e.mapPoint;
+              //Creamos el grafico del punto
+              var grafico = new Graphic(punto,puntoSymbol);
+              //Obtenemos el radio de la caja de texto
+              Radius = parseFloat(inputRadius.value);
+              //si no han introducido el radio, ventana emerjente requiriendolo
+              if (inputRadius.value == ""){
+                alert("Introduce un radio de busqueda");
+              //Cuando lo haya introducido creamos el circulo, lo añadimos como grafico y 
+              // añadimos el grafico de punto y de circulo a las graphicLayers (por tanto al mapa)
+              } else{
+                    circulo = new Circle(punto,{
+                      "radius": Radius
+                    });
+                    var circuloGrafico = new Graphic(circulo,sfs);
+                    graphicPunto.add(grafico);
+                    graphicCirculo.add(circuloGrafico);
+                }
+          });
+          //Definimos el boton segun id
+          var btnPopu = document.getElementById('btnQuery');
+          //Añadimos evento click sobre el boton
+          btnPopu.addEventListener('click',function(){
+                //Limpiamos la capa grafica para que no se solapen selecciones sucesivas
+                graphicPop.clear();
+                
+                //Obtenemos el valor del radio y de poblacion la caja de texo para hacer la cosulta
+                Radius = parseFloat(inputRadius.value);
+                var Poblacion = parseFloat(inputPop.value);
+                //creamos el circulo
+                circulo = new Circle(punto,{
+                   "radius": Radius
+                 });
+                //Definimos la query y sus propiedades (metiendo la Poblacion como where)
+                var query = new Query();
+                 query.where = "pop2000>" + Poblacion;
+                query.returnGeometry = true;
+                query.outFields = ["areaname","pop2000"];
+                query.geometry = circulo;
+                query.spatialRelationship = query.SPATIAL_REL_INTERSECTS;
+                       
+
+                //Definimos la QueryTask 
+                var queryTask = new QueryTask('http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0');
+                //Y la ejecutamos, como callback hacemos la funcion addCities definida debajo
+                queryTask.execute(query,addCities);
+                //Funcion:
+                function addCities(fsResult){
+                      //Obtenemos las features de la Feature Set que nos devuelve el execute y las almacenamos en var features
+                      var features = fsResult.features;
+                      //Definimos la simbologia que despues aplicaremos a nuestras features
+                      var pictureMarkerSymbol = new PictureMarkerSymbol('http://www.pixel-pro.com/orange/img/illustrations/location.png', 35, 35);
+                      //Bucle for que recorrera todas las entidades de nuestra features, aplicandoles una simbologia y añadiendolas a la capa grafica.
+                      for (var i = 0; i < features.length; i++) {
+
+                        features[i].symbol = pictureMarkerSymbol;
+
+                        graphicPop.add(features[i]);
+                      };
+            };
+          });
+        });
+    </script>
+
+  </head>
+
+  <body class="claro">
+  <div id='inputs'>
+        <div id='radiusDiv'>
+              <label for="inputRadius">Radio (m)</label>
+              <input id='inputRadius' type="text" class="form-control" placeholder="Radio de busqueda">
+        </div>
+        <div id='popuDiv'>
+              <label for="inputPop">Habitantes</label>
+              <input id='inputPop' type="text" class="form-control" placeholder="Habitantes">
+        </div>
+        <br>
+        <div>
+            <button id='btnQuery' type="button" class="btn btn-default">Buscar</button>
+        </div>
+  </div>
+  <div id="mapDiv">
+    
+  </div>
+  </body>
+
+</html>
