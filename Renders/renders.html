@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://js.arcgis.com/3.16/"></script>
+
+    
+    <title>Population Render</title>
+
+    <style>
+    html, body, #mapDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+  }
+    </style>
+
+    <script>
+    require([
+      "esri/map",
+      "esri/tasks/query",
+      "esri/tasks/QueryTask",
+      "esri/symbols/SimpleFillSymbol",
+      "esri/symbols/SimpleLineSymbol",
+      "esri/Color",
+      "esri/layers/GraphicsLayer",
+      "esri/graphic",
+      "esri/renderers/ClassBreaksRenderer",
+      "dojo/domReady!"], 
+      function(Map,Query,QueryTask,SimpleFillSymbol,SimpleLineSymbol,Color,GraphicsLayer,Graphic,ClassBreaksRenderer) {
+      map = new Map("mapDiv", {
+        center: [-56.049, 38.485],
+        zoom: 3,
+        basemap: "dark-gray"
+        });
+      var UrlCounties ='http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2';
+      var graphicCounties = new GraphicsLayer();
+      map.addLayer(graphicCounties);
+
+      //DefaulSimbol
+      var DefaulSimbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color("#F5A9A9"), 0.2),new Color("#F5A9A9")
+      );
+      var breakRender = new ClassBreaksRenderer(DefaulSimbol, "pop2000");
+      //
+      var Symbol250k = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color("#F78181"), 0.2),new Color("#F78181")
+      );
+      breakRender.addBreak(0, 500000, Symbol250k);
+      //
+      var Symbol500k = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color("#FA5858"), 0.2),new Color("#FA5858")
+      );
+      breakRender.addBreak(500001, 100000, Symbol500k);
+      //
+      var Symbol1kk = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color("#FE2E2E"), 0.2),new Color("#FE2E2E")
+      );
+      breakRender.addBreak(1000001, 2000000, Symbol1kk);
+      //
+      var Symbol2kk = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color("#FF0000"), 0.2),new Color("#FF0000")
+      );
+      breakRender.addBreak(2000001, 10000000, Symbol2kk);
+      //Estrablecer el render
+      graphicCounties.setRenderer(breakRender);
+
+      //QUERY
+      
+
+      map.on("click",function(e){
+
+          var query = new Query();
+          query.where = "1=1";
+          query.returnGeometry = true;
+          query.outFields = ["state_name","pop2000"];
+
+          var queryTask = new QueryTask(UrlCounties);
+
+          queryTask.execute(query,addCities);
+
+          function addCities(fsResult){
+
+          var features = fsResult.features;
+          for (var i = 0; i < features.length; i++) {
+            graphicCounties.add(features[i]);
+          };
+
+          };
+      });
+    });
+    </script>
+
+  </head>
+
+  <body class="claro">
+  <div id="mapDiv"></div>
+  </body>
+
+</html>
